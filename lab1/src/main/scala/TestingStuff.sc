@@ -1,5 +1,6 @@
 
 import scala.io.Source
+import scala.util.Random
 //import scala.sys.process._
 
 //"ls -al" !
@@ -19,6 +20,15 @@ val sortedSet = collection.immutable.SortedSet[Int]() ++ hashes
 sortedSet foreach println
 
 
-val primes = List("15487471	15487933	15488293	15488723")
-primes.map(_.split(" "))
+//val primes = List("15487471	15487933	15488293	15488723")
+//primes.map(_.split(" "))
+
+def max(a: Int)(b: Int) = if (a > b) a else b
+
+max(1)(2)
+
+
+val rnd = new Random
+rnd.nextLong
+
 
