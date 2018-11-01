@@ -1,0 +1,17 @@
+
+# Created by https://www.gitignore.io/api/scala,jupyternotebook
+# Edit at https://www.gitignore.io/?templates=scala,jupyternotebook
+
+### JupyterNotebook ###
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+
+# Remove previous ipynb_checkpoints
+#   git rm -r .ipynb_checkpoints/
+#
+
+### Scala ###
+*.class
+*.log
+
+# End of https://www.gitignore.io/api/scala,jupyternotebook
