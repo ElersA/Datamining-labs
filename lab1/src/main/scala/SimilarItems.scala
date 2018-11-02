@@ -11,7 +11,7 @@ object SimilarItems {
 
   def shingling(k: Int, document: List[Char]): SortedSet[Int] = {
     val kShingles: Set[List[Char]] = document.sliding(k).toSet
-    val hashedShingles = kShingles.map(_.hashCode()) // TODO maybe use abs to avoid negative numbers
+    val hashedShingles = kShingles.map(shingle => Math.abs(shingle.hashCode()))
     SortedSet[Int]() ++ hashedShingles // Convert our Set to a SortedSet
   }
 
@@ -53,6 +53,29 @@ object SimilarItems {
   }
 
   def compareSignatures(a: Set[Int], b: Set[Int]): Double = {
+    // Assumption: a & b are of equal size
+    val count = a.zip(b).foldLeft(0)((acc: Int, hashTuple: (Int, Int)) => if (hashTuple._1 == hashTuple._2) acc + 1 else acc)
+    count.toDouble / a.size.toDouble
+  }
+
+  def LSH(minHashes: List[Set[Int]], similarity: Double): List[(Int, Int)] = {
+    val b = 20 // Bands. Hardcoded values from the slides
+    val r = 5 // Rows. Hardcoded values from the slides
+
+    val buckets = 10000
+    val candidatePairHolder: Map[Int, Map[Int, List[Int]]] = Map.empty
+
+    minHashes foreach {hashes =>
+      hashes.sliding(r, r).sum
+
+    }
+
+    /*
+        1. Iterate over each Set in minHashes
+        2. For each Set: create a sliding window of size r and step size r
+        3. In each sliding window: sum all values and hash the sum
+        4. Save the hash
+     */
 
   }
 
