@@ -25,7 +25,26 @@ object SimilarItems {
   }
 
   def minHashing(n: Int, hashedShingles: SortedSet[Long]): Set[Long] = {
+     val rnd = new Random
+    val listOfMin = new ListBuffer[Int]()
+    rnd.setSeed(0)
+    var minval = Int.MaxValue
+    // foreach hash apply to every shingle get min value for that hash and save to list
+    primes.foreach(prime =>{
+        val a = rnd.nextInt(10)
+        val b = rnd.nextInt(10)
+        hashedShingles.foreach(shingle=>{
+          var tempmin = (a*shingle+b) % prime
+          if(minval < tempmin) {
+            minval = tempmin
+          }
+        })
+      listOfMin.+=(minval)
+      minval = Int.MaxValue
+      }
+    )
 
+    
     primes map {prime =>
       var tempMin = hashFunc(prime)(hashedShingles.head) // Initial value
       val hashFuncWithPrime = hashFunc(prime)
