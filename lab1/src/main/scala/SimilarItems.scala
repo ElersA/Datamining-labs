@@ -18,8 +18,8 @@ object SimilarItems {
 
   //Return the Jacard similarty of two sets
   def compareSets(a: SortedSet[Int], b: SortedSet[Int]): Double = {
-    val numerator = a.intersect(b).size
-    val denominator = a.union(b).size
+    val numerator = a.intersect(b).size.toDouble
+    val denominator = a.union(b).size.toDouble
 
     //Check that both sets are not 0
     numerator / denominator match {
@@ -47,7 +47,7 @@ object SimilarItems {
       //For each shinle apply the hashfunction save if it is less than what is saved
       hashedShingles.foreach { shingle =>
         var tempmin = (a * shingle + b) % prime
-        if (minval < tempmin) {
+        if (minval > tempmin) {
           minval = tempmin
         }
       }
@@ -66,19 +66,45 @@ object SimilarItems {
   }
 
   //Return the canditate pairs that will be then compared for signatures.
-  def LSH(signatures: List[Set[Int]], similarity: Double): List[(Int, Int)] = {
-    val b = 20 // Bands. Hardcoded values from the slides
-    val r = 5 // Rows. Hardcoded values from the slides
+  def LSH(signatures: List[Set[Int]], t: Double): List[(Int, Int)] = {
 
     val buckets = 10000
-    val candidatePairHolder: Map[Int, Map[Int, List[Int]]] = Map.empty
+    val listOfbAndR = new ListBuffer[(Int,Int)]()
+
+    var b = 1
+    //loop and find canditate bands and rows for the amount of hashes
+    while({b < signatures(0).size}) {
+      val z = signatures(0).size % b
+      if (z == 0) {
+        listOfbAndR.append((b, signatures(0).size / b))
+      }
+      b += 1
+    }
+
+    //Loop thourgh candidates
+    var minTDiff = Double.MaxValue
+    var r = 0
+    listOfbAndR.foreach{ x =>
+      //x._1 = b , x._2 = r
+      // t = 1/b ^1/r
+      val tempdif = Math.abs(t - Math.pow(1/x._1, 1/x._2))
+      if(tempdif<minTDiff){
+        minTDiff = tempdif
+        b = x._1
+        r = x._2
+      }
+    }
+
+    val candidatePairHolder = Map.empty
 
     //for each signature get the sum of the band and hash it
     //place the document id into the bucket from the hash
     signatures foreach {sig =>
-      sig.sliding(r, r).map(_.sum).toList
-
+      val slideList = sig.sliding(r, r).map(_.sum).toList
+      slideList.foreach{x }
     }
+
+
 
 
     //Iterate over the buckets and create pairs of documents
