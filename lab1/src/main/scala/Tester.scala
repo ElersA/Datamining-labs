@@ -14,27 +14,19 @@ object Tester extends App {
       Test scalability
    */
 
-  // TODO remake
   val documents: List[List[Char]] = readDocuments("./documents")
   val similarity = 0.8
-  //List of documents hashedshingles
-  val listOfShinglings = new ListBuffer[SortedSet[Int]]()
   var count =0
+
   //foreach document get the sortedset containing the hashedshingles
-  documents.foreach{doc =>
-    listOfShinglings.append(SimilarItems.shingling(9,doc))
-  }
+  val shingledDocs = documents.map(doc => SimilarItems.shingling(9,doc))
 
   //compare the documents and print the docus with a jacardsimilarity over 0.8
-
   SimilarItems.compareSets()
 
   //List of doucment signatures
-  val listOfSignatures = new ListBuffer[Set[Int]]()
   //convert the hashed shingles to signatures
-  listOfShinglings.foreach{shing =>
-    listOfSignatures.append(SimilarItems.minHashing(100,shing))
-  }
+  val minHashed = shingledDocs.map(shingles => SimilarItems.minHashing(100,shingles))
 
   //compare the signatures of the doucments
   //print doucment that are similar >0.8
