@@ -20,8 +20,8 @@ val sortedSet = collection.immutable.SortedSet[Int]() ++ hashes
 sortedSet foreach println
 
 
-//val primes = List("15487471	15487933	15488293	15488723")
-//primes.map(_.split(" "))
+//val factorFile = List("15487471	15487933	15488293	15488723")
+//factorFile.map(_.split(" "))
 
 def max(a: Int)(b: Int) = if (a > b) a else b
 
