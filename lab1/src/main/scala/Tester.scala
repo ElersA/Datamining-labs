@@ -21,13 +21,36 @@ object Tester extends App {
   //foreach document get the sortedset containing the hashedshingles
   val shingledDocs = documents.map(doc => SimilarItems.shingling(9,doc))
 
-  //compare the documents and print the docus with a jacardsimilarity over 0.8
-  SimilarItems.compareSets()
+  //compare the documents and print the documents with a jacardsimilarity over 0.8
+  var i = 0
+  var j = 0
+  while (i<shingledDocs.length){
+    while (j<shingledDocs.length){
+      if(j!=i){
+        println("Document" + i +" and Document "+ j + " are similar")
+        println(SimilarItems.compareSets(shingledDocs(i),shingledDocs(j)))
+      }
+      j+=1
+    }
+    i+=1
+    j=i
+  }
 
   //List of doucment signatures
   //convert the hashed shingles to signatures
   val minHashed = shingledDocs.map(shingles => SimilarItems.minHashing(100,shingles))
 
+  while (i<minHashed.length){
+    while (j<minHashed.length){
+      if(j!=i){
+        println("Document" + i +" and Document "+ j + " are similar")
+        println(SimilarItems.compareSignatures(minHashed(i),minHashed(j)))
+      }
+      j+=1
+    }
+    i+=1
+    j=i
+  }
   //compare the signatures of the doucments
   //print doucment that are similar >0.8
 
