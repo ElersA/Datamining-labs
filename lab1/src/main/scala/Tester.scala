@@ -14,7 +14,7 @@ object Tester extends App {
       Test scalability
    */
 
-  val documents: List[List[Char]] = readDocuments("./documents")
+  val documents: List[List[Char]] = readDocuments("./src/main/scala/documents")
   val similarity = 0.8
   var count =0
 
@@ -39,11 +39,12 @@ object Tester extends App {
   //List of doucment signatures
   //convert the hashed shingles to signatures
   val minHashed = shingledDocs.map(shingles => SimilarItems.minHashing(100,shingles))
-
+  i = 0
+  j = 0
   while (i<minHashed.length){
     while (j<minHashed.length){
       if(j!=i){
-        println("Document" + i +" and Document "+ j + " are similar")
+
         println(SimilarItems.compareSignatures(minHashed(i),minHashed(j)))
       }
       j+=1

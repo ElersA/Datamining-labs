@@ -6,7 +6,7 @@ import scala.util.Random
 object SimilarItems {
 
   // For testing
-  val primes: List[Int] = Source.fromFile("./primes").getLines.toList.map(_.toInt) // From https://www.bigprimes.net/archive/prime/13999999/
+  val factorList: List[Int] = Source.fromFile("./src/main/scala/factorFile").getLines.toList.map(_.toInt) // From https://www.bigprimes.net/archive/prime/13999999/
   def readFile: List[Char] = Source.fromFile("./tempData.txt").getLines.toList.flatten
 
   //create shinglings of length k from the list of charachters and return a sorted set contating the hased values for the shinglings
@@ -29,24 +29,25 @@ object SimilarItems {
   }
 
   //Get the minash for the shingles
-  def minHashing(n: Int, hashedShingles: SortedSet[Int]): Set[Int] = {
+  def minHashing(n: Int, hashedShingles: SortedSet[Int]): ListBuffer[Int] = {
     val rnd = new Random
     rnd.setSeed(0)
     var minval = Int.MaxValue
     val listOfMin = new ListBuffer[Int]()
     // foreach hash apply to every shingle get min value for that hash and save to list
-    primes.take(n).foreach { prime =>
+    factorList.take(n).foreach { factor =>
+
       /*
         hash function: (ax+b) % c
           a and b are random values
           c is a large prime.
           x is an element from the input set
       */
-      val a = 3
-      val b = 5
+      val a = factor
+      val b = factor
       //For each shinle apply the hashfunction save if it is less than what is saved
       hashedShingles.foreach { shingle =>
-        var tempmin = (a * shingle + b) % prime
+        var tempmin = (Math.abs(a * shingle) + b) % 15486557
         if (minval > tempmin) {
           minval = tempmin
         }
@@ -55,17 +56,29 @@ object SimilarItems {
       minval = Int.MaxValue
     }
     //Return a set of miniumhashvalues
-    listOfMin.toSet
+    println(listOfMin)
+    listOfMin
   }
 
   //Return the fraction from the amount of hashes equal in two sets devieded by the amount of hashes used.
-  def compareSignatures(a: Set[Int], b: Set[Int]): Double = {
+  def compareSignatures(a: ListBuffer[Int], b: ListBuffer[Int]): Double = {
     // Assumption: a & b are of equal size
     val count = a.zip(b).foldLeft(0)((acc: Int, hashTuple: (Int, Int)) => if (hashTuple._1 == hashTuple._2) acc + 1 else acc)
+    var i = 0
+    //var count =0
+    /*while(i<a.size){
+      if(a(i) == b(i)){
+        count+=1
+      }
+      i+=1
+    }
+    */
+    println(count)
     count.toDouble / a.size.toDouble
   }
 
   //Return the canditate pairs that will be then compared for signatures.
+  /*
   def LSH(signatures: List[Set[Int]], t: Double): List[(Int, Int)] = {
 
     val buckets = 10000
@@ -99,11 +112,10 @@ object SimilarItems {
 
     //for each signature get the sum of the band and hash it
     //place the document id into the bucket from the hash
-    signatures foreach {sig =>
+    /*signatures.foreach {sig =>
       val slideList = sig.sliding(r, r).map(_.sum).toList
-      slideList.foreach{x }
     }
-
+  */
 
 
 
@@ -116,6 +128,7 @@ object SimilarItems {
         3. In each sliding window: sum all values and hash the sum
         4. Save the hash
      */
-
+    1
   }
+  */
 }
