@@ -22,6 +22,7 @@ object Tester extends App {
   val shingledDocs = documents.map(doc => SimilarItems.shingling(9,doc))
 
   //compare the documents and print the documents with a jacardsimilarity over 0.8
+  val t0 = System.currentTimeMillis()
   var i = 0
   var j = 0
   while (i<shingledDocs.length){
@@ -35,9 +36,12 @@ object Tester extends App {
     i+=1
     j=i
   }
+  val t1 = System.currentTimeMillis()
+  println("Elapsed time: " + (t1 - t0) + "ms")
 
   //List of doucment signatures
   //convert the hashed shingles to signatures
+
   val minHashed = shingledDocs.map(shingles => SimilarItems.minHashing(100,shingles))
   i = 0
   j = 0
@@ -53,7 +57,7 @@ object Tester extends App {
     j=i
   }
 
-  val candidatePairs = SimilarItems.LSH(minHashed,0.8)
+  val candidatePairs = SimilarItems.LSH(minHashed,0.3)
 
   println(candidatePairs)
 

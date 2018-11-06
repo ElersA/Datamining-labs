@@ -105,15 +105,18 @@ object SimilarItems {
       //x._1 = b , x._2 = r
       // t = 1/b ^1/r
       val tempdif = Math.abs(t - Math.pow(1/x._1.toDouble, 1/x._2.toDouble))
+      //println(tempdif)
+      //println("r:" + x._2 + "b " + x._1)
+
       if(tempdif<minTDiff){
         minTDiff = tempdif
         b = x._1
         r = x._2
       }
     }
-    println("bands" +b + "rows"+ r)
+    println("bands " +b + " rows "+ r)
 
-    val listOfPairs = Set[(Int,Int)]()
+    var listOfPairs = Set[(Int,Int)]()
 
     var test = new HashMap[Int, Set[Int]] with MultiMap[Int, Int]
 
@@ -125,7 +128,7 @@ object SimilarItems {
 
       //Go over every document signature for the band
       while(j<signatures.length){
-        //Get the sum for the doucment and hash it and save the doucment index
+        //Get the sum for the document and hash it and save the doucment index
         val sum = signatures(j).slice(i,i+r-1).sum
         test.addBinding(sum % buckets, j)
         j+=1
@@ -133,8 +136,7 @@ object SimilarItems {
       }
       //for every key in key set append list of paris by geting the values and the posible combinations
       for (key <- test.keySet) {
-        println(test(key).toList.combinations(2).toList.map{case List(x,y) => (x,y)})
-        listOfPairs.union(test(key).toList.combinations(2).toList.map{case List(x,y) => (x,y)}.toSet)
+        listOfPairs = listOfPairs.union(test(key).toList.combinations(2).toList.map{case List(x,y) => (x,y)}.toSet)
       }
       //rest buckets and move to next band
       test = new HashMap[Int, Set[Int]] with MultiMap[Int, Int]
