@@ -25,11 +25,8 @@ object SimilarItems {
     val numerator = a.intersect(b).size.toDouble
     val denominator = a.union(b).size.toDouble
 
-    //Check that both sets are not 0
-    numerator / denominator match {
-      case 0 => throw new IllegalArgumentException("Do not divide by zero")
-      case _ => numerator.toDouble / denominator.toDouble
-    }
+    numerator.toDouble / denominator.toDouble
+
   }
 
   //Get the minash for the shingles

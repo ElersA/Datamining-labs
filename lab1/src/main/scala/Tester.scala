@@ -21,6 +21,7 @@ object Tester extends App {
   //foreach document get the sortedset containing the hashedshingles
   val shingledDocs = documents.map(doc => SimilarItems.shingling(9,doc))
 
+
   //compare the documents and print the documents with a jacardsimilarity over 0.8
   val t0 = System.currentTimeMillis()
   var i = 0
