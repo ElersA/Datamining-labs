@@ -52,8 +52,16 @@ object Tester extends App {
     i+=1
     j=i
   }
+
+  val candidatePairs = SimilarItems.LSH(minHashed,0.5)
+
+  candidatePairs.foreach{x =>
+    println(SimilarItems.compareSignatures(minHashed(x._1),minHashed(x._2)))
+  }
+
   //compare the signatures of the doucments
   //print doucment that are similar >0.8
+
 
   //apply lsh on the signatures
 

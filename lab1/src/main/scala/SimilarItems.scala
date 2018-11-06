@@ -1,5 +1,9 @@
 import scala.collection.SortedSet
 import scala.collection.mutable.ListBuffer
+import scala.collection.mutable.HashMap
+import scala.collection.mutable.MultiMap
+import scala.collection.mutable.Set
+
 import scala.io.Source
 import scala.util.Random
 
@@ -78,18 +82,18 @@ object SimilarItems {
   }
 
   //Return the canditate pairs that will be then compared for signatures.
-  /*
-  def LSH(signatures: List[Set[Int]], t: Double): List[(Int, Int)] = {
+
+  def LSH(signatures: List[ListBuffer[Int]], t: Double): List[(Int, Int)] = {
 
     val buckets = 10000
     val listOfbAndR = new ListBuffer[(Int,Int)]()
-
+    val sigSize = signatures(0).size
     var b = 1
     //loop and find canditate bands and rows for the amount of hashes
-    while({b < signatures(0).size}) {
-      val z = signatures(0).size % b
+    while({b < sigSize}) {
+      val z = sigSize % b
       if (z == 0) {
-        listOfbAndR.append((b, signatures(0).size / b))
+        listOfbAndR.append((b, sigSize / b))
       }
       b += 1
     }
@@ -108,10 +112,45 @@ object SimilarItems {
       }
     }
 
-    val candidatePairHolder = Map.empty
+    val listOfPairs = new ListBuffer[(Int,Int)]()
+
+    var test = new HashMap[Int, Set[Int]] with MultiMap[Int, Int]
+
+    var i = 0
+    var j = 0
+
+    //iterate from 0 -> amount of signatures by adding band size
+    while(i<sigSize){
+
+      //Go over every document signature for the band
+      while(j<signatures.length){
+        //Get the sum for the doucment and hash it and save the doucment index
+        val sum = signatures(j).slice(i,i+r).sum
+        test.addBinding(sum % buckets, j)
+        j+=1
+
+      }
+      //for every key in key set append list of paris by geting the values and the posible combinations
+      for (key <- test.keySet) {
+        listOfPairs ++ test.get(key).toList.combinations(2).toList
+      }
+      //rest buckets and move to next band
+      test = new HashMap[Int, Set[Int]] with MultiMap[Int, Int]
+      j=0
+      i+=r
+    }
+    //return the list of pairs
+    listOfPairs
+
+
 
     //for each signature get the sum of the band and hash it
     //place the document id into the bucket from the hash
+
+
+    //create list and save the hash as index and append the document at that index
+    //iterate over the list and create pairs
+
     /*signatures.foreach {sig =>
       val slideList = sig.sliding(r, r).map(_.sum).toList
     }
@@ -128,7 +167,7 @@ object SimilarItems {
         3. In each sliding window: sum all values and hash the sum
         4. Save the hash
      */
-    1
+
   }
-  */
+
 }
