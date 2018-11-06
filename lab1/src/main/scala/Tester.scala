@@ -1,9 +1,7 @@
 
 import SimilarItems._
-
 import scala.io.Source
 import java.io.File
-
 import scala.collection.SortedSet
 import scala.collection.mutable.ListBuffer
 
@@ -66,30 +64,20 @@ object Tester extends App {
     println(SimilarItems.compareSignatures(minHashed(x._1),minHashed(x._2)))
   }
 
-  //compare the signatures of the doucments
-  //print doucment that are similar >0.8
-
-
-  //apply lsh on the signatures
-
-  //take the list of suggested pairs and compare their signatures.
-  //print document that are similar >0.8
-
-
-
-  /* Code to measure time
-    http://biercoff.com/easily-measuring-code-execution-time-in-scala/
-
+  /*
+      Code to measure time
+      Source: http://biercoff.com/easily-measuring-code-execution-time-in-scala/
+   */
+  def time[R](block: => R): R = {
     val t0 = System.nanoTime()
     val result = block    // call-by-name
     val t1 = System.nanoTime()
     println("Elapsed time: " + (t1 - t0) + "ns")
-   */
+    result
+  }
 
-  // TODO check if this works
   def readDocuments(directoryPath: String): List[List[Char]] = {
     val files = new File(directoryPath).listFiles()
     files.map(file => Source.fromFile(file).getLines.toList.flatten).toList
   }
-
 }
