@@ -15,7 +15,7 @@ object SimilarItems {
 
   //create shinglings of length k from the list of charachters and return a sorted set contating the hased values for the shinglings
   def shingling(k: Int, document: List[Char]): SortedSet[Int] = {
-    val kShingles: Set[List[Char]] = document.sliding(k).toSet
+    val kShingles: Predef.Set[List[Char]] = document.sliding(k).toSet
     val hashedShingles = kShingles.map(shingle => Math.abs(shingle.hashCode()))
     SortedSet[Int]() ++ hashedShingles // Convert our Set to a SortedSet
   }
@@ -60,7 +60,6 @@ object SimilarItems {
       minval = Int.MaxValue
     }
     //Return a set of miniumhashvalues
-    println(listOfMin)
     listOfMin
   }
 
@@ -77,26 +76,27 @@ object SimilarItems {
       i+=1
     }
     */
-    println(count)
     count.toDouble / a.size.toDouble
   }
 
   //Return the canditate pairs that will be then compared for signatures.
 
-  def LSH(signatures: List[ListBuffer[Int]], t: Double): List[(Int, Int)] = {
+  def LSH(signatures: List[ListBuffer[Int]], t: Double): Set[(Int, Int)] = {
 
-    val buckets = 10000
+    val buckets = 6827
     val listOfbAndR = new ListBuffer[(Int,Int)]()
     val sigSize = signatures(0).size
     var b = 1
     //loop and find canditate bands and rows for the amount of hashes
-    while({b < sigSize}) {
+    while({b < sigSize+1}) {
       val z = sigSize % b
       if (z == 0) {
+
         listOfbAndR.append((b, sigSize / b))
       }
       b += 1
     }
+
 
     //Loop thourgh candidates
     var minTDiff = Double.MaxValue
@@ -104,15 +104,16 @@ object SimilarItems {
     listOfbAndR.foreach{ x =>
       //x._1 = b , x._2 = r
       // t = 1/b ^1/r
-      val tempdif = Math.abs(t - Math.pow(1/x._1, 1/x._2))
+      val tempdif = Math.abs(t - Math.pow(1/x._1.toDouble, 1/x._2.toDouble))
       if(tempdif<minTDiff){
         minTDiff = tempdif
         b = x._1
         r = x._2
       }
     }
+    println("bands" +b + "rows"+ r)
 
-    val listOfPairs = new ListBuffer[(Int,Int)]()
+    val listOfPairs = Set[(Int,Int)]()
 
     var test = new HashMap[Int, Set[Int]] with MultiMap[Int, Int]
 
@@ -125,14 +126,15 @@ object SimilarItems {
       //Go over every document signature for the band
       while(j<signatures.length){
         //Get the sum for the doucment and hash it and save the doucment index
-        val sum = signatures(j).slice(i,i+r).sum
+        val sum = signatures(j).slice(i,i+r-1).sum
         test.addBinding(sum % buckets, j)
         j+=1
 
       }
       //for every key in key set append list of paris by geting the values and the posible combinations
       for (key <- test.keySet) {
-        listOfPairs ++ test.get(key).toList.combinations(2).toList
+        println(test(key).toList.combinations(2).toList.map{case List(x,y) => (x,y)})
+        listOfPairs.union(test(key).toList.combinations(2).toList.map{case List(x,y) => (x,y)}.toSet)
       }
       //rest buckets and move to next band
       test = new HashMap[Int, Set[Int]] with MultiMap[Int, Int]

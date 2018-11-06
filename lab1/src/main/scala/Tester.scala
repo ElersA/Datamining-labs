@@ -53,7 +53,9 @@ object Tester extends App {
     j=i
   }
 
-  val candidatePairs = SimilarItems.LSH(minHashed,0.5)
+  val candidatePairs = SimilarItems.LSH(minHashed,0.8)
+
+  println(candidatePairs)
 
   candidatePairs.foreach{x =>
     println(SimilarItems.compareSignatures(minHashed(x._1),minHashed(x._2)))
