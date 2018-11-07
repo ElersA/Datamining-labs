@@ -1,22 +1,19 @@
 
-import SimilarItems._
 import scala.io.Source
 import java.io.File
-import scala.collection.SortedSet
-import scala.collection.mutable.ListBuffer
 
 object Tester extends App {
 
-  val namesAndDocs: List[(String, List[Char])] = readDocuments("./src/main/scala/documents")
+  val namesAndDocs: List[(String, List[Char])] = readDocuments("./src/main/scala/documentsBigLarge")
   val (fileNames: List[String], documents: List[List[Char]]) = namesAndDocs.unzip
-  val similarity = 0.6
+  val similarity = 1
   println(s"Using a similarity threshold of $similarity")
 
   // foreach document get the SortedSet containing the hashed shingles
   val shingledDocs = documents.map(doc => SimilarItems.shingling(9,doc)).zip(fileNames)
 
   // compare the documents and print the documents with a Jaccard similarity over 0.8
-  val t0 = System.currentTimeMillis()
+  var t0 = System.currentTimeMillis()
   var i = 0
   var j = 0
   while (i<shingledDocs.length){
@@ -32,11 +29,12 @@ object Tester extends App {
     i+=1
     j=i
   }
-  val t1 = System.currentTimeMillis()
-  println("Elapsed time: " + (t1 - t0) + "ms")
+  var t1 = System.currentTimeMillis()
+  println(s"Shingling time: ${t1 - t0}ms")
 
   //List of document signatures. Convert the hashed shingles to signatures
   val minHashed = shingledDocs.map(shingles => SimilarItems.minHashing(100,shingles._1)).zip(fileNames)
+  t0 = System.currentTimeMillis()
   i = 0
   j = 0
   while (i<minHashed.length){
@@ -52,9 +50,17 @@ object Tester extends App {
     i+=1
     j=i
   }
+  t1 = System.currentTimeMillis()
+  println(s"Signature comparison time (without LSH): ${t1 - t0}ms")
 
+  t0 = System.currentTimeMillis()
   val candidatePairs = SimilarItems.LSH(minHashed.unzip._1, similarity)
-  candidatePairs.foreach{pair => println(s"Candidate pair: (${fileNames(pair._1)}, ${fileNames(pair._2)})")}
+  candidatePairs.foreach{pair =>
+    println(s"Candidate pair: (${fileNames(pair._1)}, ${fileNames(pair._2)})")
+    candidatePairs.foreach{pair => SimilarItems.compareSignatures(minHashed(pair._1)._1, minHashed(pair._2)._1)}
+  }
+  t1 = System.currentTimeMillis()
+  println(s"Signature comparison time (with LSH): ${t1 - t0}ms")
 
   val minHashComparisons = ((shingledDocs.size*shingledDocs.size) - shingledDocs.size) / 2 // (n² - n) / 2
   println(s"Number of minHash comparisons = $minHashComparisons")
@@ -75,6 +81,6 @@ object Tester extends App {
 
   def readDocuments(directoryPath: String): List[(String, List[Char])] = {
     val files = new File(directoryPath).listFiles()
-    files.map(file => (file.getName, Source.fromFile(file).getLines.toList.flatten)).toList
+    files.map(file => (file.getName, Source.fromFile(file)(io.Codec.ISO8859).getLines.toList.flatten)).toList
   }
 }
