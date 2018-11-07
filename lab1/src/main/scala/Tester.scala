@@ -7,28 +7,25 @@ import scala.collection.mutable.ListBuffer
 
 object Tester extends App {
 
-  /*
-      Test program
-      Test scalability
-   */
+  val namesAndDocs: List[(String, List[Char])] = readDocuments("./src/main/scala/documents")
+  val (fileNames: List[String], documents: List[List[Char]]) = namesAndDocs.unzip
+  val similarity = 0.6
+  println(s"Using a similarity threshold of $similarity")
 
-  val documents: List[List[Char]] = readDocuments("./src/main/scala/documents")
-  val similarity = 0.8
-  var count =0
+  // foreach document get the SortedSet containing the hashed shingles
+  val shingledDocs = documents.map(doc => SimilarItems.shingling(9,doc)).zip(fileNames)
 
-  //foreach document get the sortedset containing the hashedshingles
-  val shingledDocs = documents.map(doc => SimilarItems.shingling(9,doc))
-
-
-  //compare the documents and print the documents with a jacardsimilarity over 0.8
+  // compare the documents and print the documents with a Jaccard similarity over 0.8
   val t0 = System.currentTimeMillis()
   var i = 0
   var j = 0
   while (i<shingledDocs.length){
     while (j<shingledDocs.length){
       if(j!=i){
-        println("Document" + i +" and Document "+ j + " are similar")
-        println(SimilarItems.compareSets(shingledDocs(i),shingledDocs(j)))
+        val jaccardSimilarity = SimilarItems.compareSets(shingledDocs(i)._1,shingledDocs(j)._1)
+        if (jaccardSimilarity >= similarity) {
+          println(s"documents: ${shingledDocs(i)._2} and ${shingledDocs(j)._2} are $jaccardSimilarity equal (JACCARD SIMILARITY)")
+        }
       }
       j+=1
     }
@@ -38,17 +35,17 @@ object Tester extends App {
   val t1 = System.currentTimeMillis()
   println("Elapsed time: " + (t1 - t0) + "ms")
 
-  //List of doucment signatures
-  //convert the hashed shingles to signatures
-
-  val minHashed = shingledDocs.map(shingles => SimilarItems.minHashing(100,shingles))
+  //List of document signatures. Convert the hashed shingles to signatures
+  val minHashed = shingledDocs.map(shingles => SimilarItems.minHashing(100,shingles._1)).zip(fileNames)
   i = 0
   j = 0
   while (i<minHashed.length){
     while (j<minHashed.length){
       if(j!=i){
-
-        println(SimilarItems.compareSignatures(minHashed(i),minHashed(j)))
+        val signatureSimilarity = SimilarItems.compareSignatures(minHashed(i)._1, minHashed(j)._1)
+        if (signatureSimilarity >= similarity) {
+          println(s"documents: ${minHashed(i)._2} and ${minHashed(j)._2} are $signatureSimilarity equal (SIGNATURE SIMILARITY)")
+        }
       }
       j+=1
     }
@@ -56,13 +53,13 @@ object Tester extends App {
     j=i
   }
 
-  val candidatePairs = SimilarItems.LSH(minHashed,0.3)
+  val candidatePairs = SimilarItems.LSH(minHashed.unzip._1, similarity)
+  candidatePairs.foreach{pair => println(s"Candidate pair: (${fileNames(pair._1)}, ${fileNames(pair._2)})")}
 
-  println(candidatePairs)
-
-  candidatePairs.foreach{x =>
-    println(SimilarItems.compareSignatures(minHashed(x._1),minHashed(x._2)))
-  }
+  val minHashComparisons = ((shingledDocs.size*shingledDocs.size) - shingledDocs.size) / 2 // (n² - n) / 2
+  println(s"Number of minHash comparisons = $minHashComparisons")
+  println(s"Number of candidate pairs: ${candidatePairs.size}")
+  println(s"Number of comparisons reduced by LSH = ${minHashComparisons - candidatePairs.size} (${(minHashComparisons-candidatePairs.size).toDouble / minHashComparisons.toDouble}%)")
 
   /*
       Code to measure time
@@ -76,8 +73,8 @@ object Tester extends App {
     result
   }
 
-  def readDocuments(directoryPath: String): List[List[Char]] = {
+  def readDocuments(directoryPath: String): List[(String, List[Char])] = {
     val files = new File(directoryPath).listFiles()
-    files.map(file => Source.fromFile(file).getLines.toList.flatten).toList
+    files.map(file => (file.getName, Source.fromFile(file).getLines.toList.flatten)).toList
   }
 }
