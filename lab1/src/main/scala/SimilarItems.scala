@@ -8,7 +8,7 @@ import scala.io.Source
 object SimilarItems {
 
   // List of factors to use in minHashing
-  val factorList: List[Int] = Source.fromFile("./src/main/scala/factorFile").getLines.toList.map(_.toInt) // From https://www.bigprimes.net/archive/prime/13999999/
+  val factorList: List[Int] = Source.fromFile("./src/main/scala/factorFile").getLines.toList.map(_.toInt)
 
   // Create shingles of length k from the list of characters and return a SortedSet containing the shingles' hashes
   def shingling(k: Int, document: List[Char]): SortedSet[Int] = {
