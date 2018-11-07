@@ -1,25 +1,53 @@
 import scala.io.Source
+import scala.collection.mutable.Map
 
 object Apriori {
 
   // Task 1: Finding frequent itemsets with support at least s
-  val lines = Source.fromFile("./T10I4D100K.dat").getLines
-  var table = scala.collection.mutable.Map[Int, Int]()
+  def readData(path: String): Iterator[String] = Source.fromFile(path).getLines
+  val dataPath = "./T10I4D100K.dat"
+  val lines = readData(dataPath)
   val support = 0.01
-  val baskets = lines.size
+  val table = Map[Set[String], Int]()
 
+  var counter = 0
   while (lines.hasNext) {
+    counter += 1
     val data = lines.next()
-    data.split(" ").foreach(elem => table.put(elem.toInt, table.getOrElse(elem.toInt, 0) + 1))
+    data.split(" ").foreach(elem => table.put(Set(elem), table.getOrElse(Set(elem), 0) + 1))
+  }
+  val baskets = counter
+
+
+  def scanData(iter: Iterator[String], elems: List[Set[String]]): Map[Set[String], Int] = {
+    val result = Map[Set[String], Int]()
+    while (iter.hasNext) {
+      val data = iter.next()
+      elems
+        .filter(candidate => candidate.subsetOf(data.split(" ").toSet))
+        .foreach(elem => result.put(elem, result.getOrElse(elem, 0) + 1))
+    }
+    result
   }
 
-  table.filter{case (k,v) => (v / baskets) >= support}
+  val filteredTable = table.filter { case (k, v) => (v.toDouble / baskets) >= support }
 
+  table.keySet.toList.combinations(2)
 
+  def launchRecursiveStuff(initial: Map[Set[String], Int]): List[Set[Int]] = {
+    def recursiveStuff(current: Map[Set[String], Int], history: List[Map[Set[String], Int]]): List[Set[Int]] = {
+
+      current match {
+        case Map.empty =>
+        case _ =>
+      }
+    }
+
+    recursiveStuff(initial, List(initial))
+  }
 
 
   // Task 2: Generating association rules with confidence at least c from the itemsets in a sales transaction database (a set of baskets)
-
 
 
 }
