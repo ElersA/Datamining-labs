@@ -1,4 +1,3 @@
-import scala.collection.mutable
 import scala.io.Source
 import scala.collection.mutable.Map
 
@@ -22,27 +21,18 @@ object Apriori {
   val filteredTable = table.filter { case (k, v) => (v.toDouble / baskets) >= support }
   table.keySet.toList.combinations(2)
 
-  def launchRecursiveStuff(initial: Map[Set[String], Int]): List[Set[Int]] = {
-    def recursiveStuff(previous: List[Set[String]], singletons: List[Set[String]], acc: List[Set[String]]): List[Set[String]] = {
+  def launchRecursiveStuff(initial: Set[Set[String]]): Set[Set[String]] = {
+    def recursiveStuff(previous: Set[Set[String]], singletons: Set[Set[String]], acc: Set[Set[String]]): Set[Set[String]] = {
 
       /*
           1. Scan/filter -> results in a Map[Set[String], count] with elements with support >= supportThreshold
-            scanData(readData(path), previous)
-
           2. Generate candidates
-            for {
-              candidatePair <-
-              if ()
-            } yield
-
        */
       val (supportedSets, unSupportedSets) = scanData(readData(dataPath), previous)
 
       previous match {
-        case Nil => acc // Base case. No pairs had enough support to be generated.
+        case Set.empty => acc // Base case. No pairs had enough support to be generated.
         case _ =>
-
-
           /*
               Combine supported candidate sets with singletons
               If a singleton already exists in the candidate set -> discard
@@ -51,24 +41,22 @@ object Apriori {
               Else add
 
            */
-          //supportedSets.map(x => )
-
-          for {
+          val ourResult = for {
             candidate <- supportedSets
             singleton <- singletons
-            if !candidate.contains(singleton)
-            test = candidate.union(Set(singleton))
-            unSupported <- unSupportedSets
-            if !unSupported.subsetOf(test)
-          } yield test
+            if !singleton.subsetOf(candidate)
+            test = candidate | singleton
 
+            if unSupportedSets.forall(unSupported => !unSupported.subsetOf(test))
+            //if supportedSets.exists(supported => supported.subsetOf(test))
+          } yield test
+          ourResult.toSet
       }
     }
-
-    recursiveStuff(initial, List(initial))
+    recursiveStuff(initial, initial, initial) // arguments are previous, singletons, acc
   }
 
-  def scanData(iter: Iterator[String], elems: List[Set[String]]): (List[Set[String]], List[Set[String]]) = {
+  def scanData(iter: Iterator[String], elems: Set[Set[String]]): (Set[Set[String]], Set[Set[String]]) = {
     /*
         1. Counts
         2. Prunes
@@ -81,7 +69,7 @@ object Apriori {
         .foreach(elem => result.put(elem, result.getOrElse(elem, 0) + 1))
     }
     val (supportedSets, unSupportedSets) = result.partition { case (k, v) => (v.toDouble / baskets) >= support }
-    (supportedSets.keys.toList, unSupportedSets.keys.toList)
+    (supportedSets.keys.toSet, unSupportedSets.keys.toSet)
   }
 
 
