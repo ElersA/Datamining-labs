@@ -5,21 +5,23 @@ object Apriori {
 
   // Task 1: Finding frequent itemsets with support at least s
   def readData(path: String): Iterator[String] = Source.fromFile(path).getLines
-  val dataPath = "./T10I4D100K.dat"
-  val lines = readData(dataPath)
-  val support = 0.01
-  val table = Map[Set[String], Int]()
+  val dataPath = "./src/main/scala/testData.dat"
+  var baskets : Int
+  def firstPass(support:Double): Set[Set[String]] = {
+    val lines = readData(dataPath)
+    val table = Map[Set[String], Int]()
 
-  var counter = 0
-  while (lines.hasNext) {
-    counter += 1
-    val data = lines.next()
-    data.split(" ").foreach(elem => table.put(Set(elem), table.getOrElse(Set(elem), 0) + 1))
+    var counter = 0
+    while (lines.hasNext) {
+      counter += 1
+      val data = lines.next()
+      data.split(" ").foreach(elem => table.put(Set(elem), table.getOrElse(Set(elem), 0) + 1))
+    }
+    baskets = counter
+    println(table)
+    val filteredTable = table.filter { case (k, v) => (v.toDouble / baskets) >= support }
+    filteredTable.keySet.flatten.toList.combinations(2).map(x=> x.toSet).toSet
   }
-  val baskets = counter
-
-  val filteredTable = table.filter { case (k, v) => (v.toDouble / baskets) >= support }
-  table.keySet.toList.combinations(2)
 
   def launchRecursiveStuff(initial: Set[Set[String]]): Set[Set[String]] = {
     def recursiveStuff(previous: Set[Set[String]], singletons: Set[Set[String]], acc: Set[Set[String]]): Set[Set[String]] = {
