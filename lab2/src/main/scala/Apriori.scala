@@ -19,7 +19,11 @@ object Apriori {
   val baskets = counter
 
 
-  def scanData(iter: Iterator[String], elems: List[Set[String]]): Map[Set[String], Int] = {
+  def scanData(iter: Iterator[String], elems: List[Set[String]]): List[(Set[String], Set[String])] = {
+    /*
+        1. Counts
+        2. Prunes
+     */
     val result = Map[Set[String], Int]()
     while (iter.hasNext) {
       val data = iter.next()
@@ -35,10 +39,23 @@ object Apriori {
   table.keySet.toList.combinations(2)
 
   def launchRecursiveStuff(initial: Map[Set[String], Int]): List[Set[Int]] = {
-    def recursiveStuff(current: Map[Set[String], Int], history: List[Map[Set[String], Int]]): List[Set[Int]] = {
+    def recursiveStuff(current: Map[Set[String], Int], previous: List[Set[String]], singletons: Set[String]): List[Set[String]] = {
+
+      /*
+          1. Scan/filter -> results in a Map[Set[String], count] with elements with support >= supportThreshold
+            scanData(readData(path), previous)
+
+          2. Generate candidates
+            for {
+              candidatePair <-
+              if ()
+            } yield
+
+       */
+
 
       current match {
-        case Map.empty =>
+        case Map.empty => previous // Base case. No pairs had enough support to be generated.
         case _ =>
       }
     }
