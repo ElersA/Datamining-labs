@@ -89,6 +89,41 @@ object Apriori {
 
 
   // Task 2: Generating association rules with confidence at least c from the itemsets in a sales transaction database (a set of baskets)
+  //maybe add support value in tuple for frequent itemsets to be able to use that value here
+  def findAssociation(itemset: Set[Set[String]], confidence :Double, support:Double) = {
+    //For every subset A of in itemset generate rule A->I/A(items let in itemset a without items A)
+    val rules = itemset.map(set=> set.subsets().map(subset=> (subset, set.diff(subset))))
 
 
+    //need to union the asso sets and the given itemset and call scandata to get the support for the diffrent rules in a ahas map
+    //the support for rulres are then used to cpmpute confidence
+    //if the confidence is higher than the paramter given save the rules in a set
+    //after every rules has been tested return the set with all rules with enough confidence
+
+    val supportForRulesandItemst = scanDataOnlyCount(readData(dataPath), itemset)
+
+    val assorules = Set[(Set[String],Set[String])]
+    rules.foreach( x=>
+      if(scanDataOnlyCount())
+
+
+    )
+    itemset.map(set=> set.subsets())
+    //if rule A-> I/A is below given confidence then subsets of A rules will allso be
+    //can thus generate bigger rules from smaller ones..
+  }
+
+  def scanDataOnlyCount(iter: Iterator[String], candidates: Set[Set[String]]): Map[Set[String], Int] = {
+    /*
+        1. Counts
+    */
+    val result = Map[Set[String], Int]()
+    while (iter.hasNext) {
+      val data = iter.next()
+      candidates
+        .filter(candidate => candidate.subsetOf(data.split(" ").toSet))
+        .foreach(elem => result.put(elem, result.getOrElse(elem, 0) + 1))
+    }
+    result
+  }
 }
