@@ -92,7 +92,10 @@ object Apriori {
   //maybe add support value in tuple for frequent itemsets to be able to use that value here
   def findAssociation(itemset: Set[Set[String]], confidence :Double, support:Double) = {
     //For every subset A of in itemset generate rule A->I/A(items let in itemset a without items A)
-    val rules = itemset.map(set=> set.subsets().map(subset=> (subset, set.diff(subset))))
+    val rules = itemset.map(set=> set.subsets()
+        .filterNot(subset => subset.isEmpty || subset == set)
+        .map(subset=> (subset, set.diff(subset))))
+
 
 
     //need to union the asso sets and the given itemset and call scandata to get the support for the diffrent rules in a ahas map
