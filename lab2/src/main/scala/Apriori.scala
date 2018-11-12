@@ -5,15 +5,15 @@ object Apriori {
 
   // Task 1: Finding frequent itemsets with support at least s
   def readData(path: String): Iterator[String] = Source.fromFile(path).getLines
-  val dataPath = "./src/main/scala/T10I4D100K.dat"
-  //val dataPath = "./src/main/scala/testDataSlide26.dat"
+  //val dataPath = "./src/main/scala/T10I4D100K.dat"
+  val dataPath = "./src/main/scala/testDataSlide26.dat"
   var baskets: Int = 0
   var support: Double = 0
 
-  def runStuff(supprt: Double): Set[Set[String]] = {
+  def getItemsets(supprt: Double): Set[Set[String]] = {
     support = supprt
-    val (initialTuples, singletons)= firstPass() // Initial is C2 on slide 43 in lecture 3
-    launchRecursiveStuff(initialTuples, singletons)
+    val (initialTuples, singletons) = firstPass() // Initial is C2 on slide 43 in lecture 3
+    generateItemsets(initialTuples, singletons)
   }
 
   def firstPass(): (Set[Set[String]], Set[Set[String]]) = {
@@ -34,9 +34,9 @@ object Apriori {
     (initialTuples, singletons.toSet)
   }
 
-  def launchRecursiveStuff(initial: Set[Set[String]], singletons: Set[Set[String]]): Set[Set[String]] = {
+  def generateItemsets(initial: Set[Set[String]], singletons: Set[Set[String]]): Set[Set[String]] = {
     println("Starting recursive stuff!")
-    def recursiveStuff(candidates: Set[Set[String]], singletons: Set[Set[String]], acc: Set[Set[String]]): Set[Set[String]] = {
+    def generateCandidates(candidates: Set[Set[String]], singletons: Set[Set[String]], acc: Set[Set[String]]): Set[Set[String]] = {
       candidates.size match {
         case 0 => acc // Base case. No pairs had enough support to be generated.
         case _ =>
@@ -57,10 +57,10 @@ object Apriori {
             test = candidate | singleton if unSupportedSets.forall(unSupported => !unSupported.subsetOf(test))
           } yield test
           println("Supported set found!")
-          recursiveStuff(ourResult.toSet, singletons, acc ++ supportedSets)
+          generateCandidates(ourResult.toSet, singletons, acc ++ supportedSets)
       }
     }
-    recursiveStuff(initial, singletons, singletons) // arguments are previous, singletons, acc
+    generateCandidates(initial, singletons, singletons) // arguments are previous, singletons, acc
   }
 
   // Task 2: Generating association rules with confidence at least c from the itemsets in a sales transaction database (a set of baskets)
