@@ -1,6 +1,6 @@
 object Test extends App {
 
-  val frequentItemSets = Apriori.runStuff(3.0/8)
+  val frequentItemSets = Apriori.runStuff(0.04)
   println("Frequent itemsets: " + frequentItemSets)
 
   val rules = Apriori.findAssociation(frequentItemSets, 0.75)
