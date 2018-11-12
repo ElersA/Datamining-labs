@@ -5,7 +5,7 @@ object Apriori {
 
   // Task 1: Finding frequent itemsets with support at least s
   def readData(path: String): Iterator[String] = Source.fromFile(path).getLines
-  val dataPath = "./src/main/scala/testData.dat"
+  val dataPath = "./src/main/scala/testDataSlide43.dat"
   var baskets: Int = 0
   var support: Double = 0
 
@@ -90,21 +90,32 @@ object Apriori {
 
   // Task 2: Generating association rules with confidence at least c from the itemsets in a sales transaction database (a set of baskets)
   //maybe add support value in tuple for frequent itemsets to be able to use that value here
-  def findAssociation(itemset: Set[Set[String]], confidence :Double, support:Double) = {
+  def findAssociation(itemset: Set[Set[String]], confidence: Double) = {
     //For every subset A of in itemset generate rule A->I/A(items let in itemset a without items A)
-    val rules = itemset.map(set=> set.subsets()
-        .filterNot(subset => subset.isEmpty || subset == set)
-        .map(subset=> (subset, set.diff(subset))))
-
-
+    val rules = itemset.flatMap(set => set.subsets()
+      .filterNot(subset => subset.isEmpty || subset == set)
+      .map(subset => (subset, set.diff(subset)))) // Set[(Set[String], Set[String])]
 
     //need to union the asso sets and the given itemset and call scandata to get the support for the diffrent rules in a ahas map
     //the support for rulres are then used to cpmpute confidence
     //if the confidence is higher than the paramter given save the rules in a set
     //after every rules has been tested return the set with all rules with enough confidence
 
-    val supportForRulesandItemst = scanDataOnlyCount(readData(dataPath), itemset)
+    val setsToCheckSupport: Set[Set[String]] = itemset ++ rules.map(_._1) // Extract the first element from each tuple and add to itemset
 
+    val supportForRulesandItemst: Map[Set[String], Int] = scanDataOnlyCount(readData(dataPath), setsToCheckSupport)
+
+    /*
+        We know each value in the supportForRulesandItemst will exist (don't have to care about Options)
+        conf(I -> j) = support(I u j) / support(I)
+        conf(supportForRulesandItemst(x._1)) =
+          support(supportForRulesandItemst(x._1) union supportForRulesandItemst(x._2))
+          / support(supportForRulesandItemst(supportx._1))
+        is this above the threshold we have as parameter?
+     */
+
+    rules.filter(rule => supportForRulesandItemst(rule._1.union(rule._2)) / supportForRulesandItemst(rule._1) >= confidence)
+/*
     val assorules = Set[(Set[String],Set[String])]
     rules.foreach( x=>
       if(scanDataOnlyCount())
@@ -113,7 +124,7 @@ object Apriori {
     )
     itemset.map(set=> set.subsets())
     //if rule A-> I/A is below given confidence then subsets of A rules will allso be
-    //can thus generate bigger rules from smaller ones..
+    //can thus generate bigger rules from smaller ones..*/
   }
 
   def scanDataOnlyCount(iter: Iterator[String], candidates: Set[Set[String]]): Map[Set[String], Int] = {
