@@ -1,4 +1,3 @@
-
 import scala.io.Source
 import java.io.File
 
@@ -13,59 +12,55 @@ object Tester extends App {
   val shingledDocs = documents.map(doc => SimilarItems.shingling(9, doc)).zip(fileNames)
 
   // Compare the documents and print the documents with a Jaccard similarity over 0.8
-  var t0 = System.currentTimeMillis()
-  var i = 0
-  var j = 0
-  while (i < shingledDocs.length) {
-    while (j < shingledDocs.length) {
-      if (j != i) {
-        val jaccardSimilarity = SimilarItems.compareSets(shingledDocs(i)._1, shingledDocs(j)._1)
-        if (jaccardSimilarity >= similarity) {
-          println(s"documents: ${shingledDocs(i)._2} and ${shingledDocs(j)._2} are $jaccardSimilarity equal (JACCARD SIMILARITY)")
+  time ("Jaccard similarity"){
+    shingledDocs.indices.foreach{ i =>
+      shingledDocs.indices.foreach{ j =>
+        if (j != i) {
+          val jaccardSimilarity = SimilarItems.compareSets(shingledDocs(i)._1, shingledDocs(j)._1)
+          if (jaccardSimilarity >= similarity) {
+            println(s"documents: ${shingledDocs(i)._2} and ${shingledDocs(j)._2} are $jaccardSimilarity equal (JACCARD SIMILARITY)")
+          }
         }
       }
-      j += 1
     }
-    i += 1
-    j = i
   }
-  var t1 = System.currentTimeMillis()
-  println(s"Shingling time: ${t1 - t0}ms")
 
   // List of document signatures. Convert the hashed shingles to signatures
   val minHashed = shingledDocs.map(shingles => SimilarItems.minHashing(100, shingles._1)).zip(fileNames)
-  t0 = System.currentTimeMillis()
-  i = 0
-  j = 0
-  while (i < minHashed.length) {
-    while (j < minHashed.length) {
-      if (j != i) {
-        val signatureSimilarity = SimilarItems.compareSignatures(minHashed(i)._1, minHashed(j)._1)
-        if (signatureSimilarity >= similarity) {
-          println(s"documents: ${minHashed(i)._2} and ${minHashed(j)._2} are $signatureSimilarity equal (SIGNATURE SIMILARITY)")
+  time ("Signature comparison (without LSH)"){
+    minHashed.indices.foreach{ i =>
+      minHashed.indices.foreach{ j =>
+        if (j != i) {
+          val signatureSimilarity = SimilarItems.compareSignatures(minHashed(i)._1, minHashed(j)._1)
+          if (signatureSimilarity >= similarity) {
+            println(s"documents: ${minHashed(i)._2} and ${minHashed(j)._2} are $signatureSimilarity equal (SIGNATURE SIMILARITY)")
+          }
         }
       }
-      j += 1
     }
-    i += 1
-    j = i
   }
-  t1 = System.currentTimeMillis()
-  println(s"Signature comparison time (without LSH): ${t1 - t0}ms")
 
-  t0 = System.currentTimeMillis()
   val candidatePairs = SimilarItems.LSH(minHashed.unzip._1, similarity)
-  candidatePairs.foreach { pair =>
-    println(s"Candidate pair: (${fileNames(pair._1)}, ${fileNames(pair._2)})")
-    candidatePairs.foreach { pair => SimilarItems.compareSignatures(minHashed(pair._1)._1, minHashed(pair._2)._1) }
+  time("Signature comparison time (with LSH)"){
+    candidatePairs.foreach { pair =>
+      println(s"Candidate pair: (${fileNames(pair._1)}, ${fileNames(pair._2)})")
+      candidatePairs.foreach { pair => SimilarItems.compareSignatures(minHashed(pair._1)._1, minHashed(pair._2)._1) }
+    }
   }
-  t1 = System.currentTimeMillis()
-  println(s"Signature comparison time (with LSH): ${t1 - t0}ms")
 
   val minHashComparisons = ((shingledDocs.size * shingledDocs.size) - shingledDocs.size) / 2 // (n² - n) / 2
   println(s"Number of minHash comparisons = $minHashComparisons")
   println(s"Number of candidate pairs: ${candidatePairs.size}")
   println(s"Number of comparisons reduced by LSH = ${minHashComparisons - candidatePairs.size} (${(minHashComparisons - candidatePairs.size).toDouble / minHashComparisons.toDouble}%)")
+
+  // Source: http://biercoff.com/easily-measuring-code-execution-time-in-scala/. A bit modified though.
+  def time[R](messageString: String)(block: => R): R = {
+    val t0 = System.currentTimeMillis()
+    val result = block    // call-by-name
+    val t1 = System.currentTimeMillis()
+    println(messageString + " :: Elapsed time: " + (t1 - t0) + "ms")
+    result
+  }
 
   def readDocuments(directoryPath: String): List[(String, List[Char])] = {
     val files = new File(directoryPath).listFiles()
