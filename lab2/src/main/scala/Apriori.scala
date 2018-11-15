@@ -89,13 +89,29 @@ object Apriori {
 
   // scanData counts number of times a candidate occurs and prunes candidates below the support threshold
   def scanData(iter: Iterator[String], candidates: Set[Set[String]]): (Set[Set[String]], Set[Set[String]]) = {
+    
     val result = Map[Set[String], Int]()
+    var y = 0
     while (iter.hasNext) {
+      val data = iter.next()
+      candidates.foreach{x =>
+        if(x.subsetOf(data.split(" ").toSet)){
+          result.put(x, result.getOrElse(x, 0) + 1)
+        }
+
+      }
+      if(y.equals(10000)){
+        println("10000 reached 10%")
+      }
+      y+=1
+    }
+    /*while (iter.hasNext) {
       val data = iter.next()
       candidates
         .withFilter(candidate => candidate.subsetOf(data.split(" ").toSet))
         .foreach(elem => result.put(elem, result.getOrElse(elem, 0) + 1))
     }
+    */
     val (supportedSets, unSupportedSets) = result.partition { case (k, v) => (v.toDouble / baskets) >= support }
     (supportedSets.keys.toSet, unSupportedSets.keys.toSet)
   }
