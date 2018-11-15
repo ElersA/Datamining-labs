@@ -30,7 +30,7 @@ object Tester extends App {
     j = i
   }
   var t1 = System.currentTimeMillis()
-  println(s"Shingling time: ${t1 - t0}ms")
+  println(s"Jaccard similarity comparison time: ${t1 - t0}ms")
 
   // List of document signatures. Convert the hashed shingles to signatures
   val minHashed = shingledDocs.map(shingles => SimilarItems.minHashing(100, shingles._1)).zip(fileNames)
