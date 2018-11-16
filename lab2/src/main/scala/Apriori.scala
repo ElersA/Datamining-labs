@@ -5,8 +5,9 @@ object Apriori {
 
   // Task 1: Finding frequent itemsets with support at least s
   def readData(path: String): Iterator[String] = Source.fromFile(path).getLines
-  //val dataPath = "./src/main/scala/T10I4D100K.dat"
-  val dataPath = "./src/main/scala/testDataSlide26.dat"
+  val dataPath = "./src/main/scala/T10I4D100K.dat"
+  //val dataPath = "./src/main/scala/testDataSlide43.dat"
+  //val dataPath = "./src/main/scala/testDataSlide26.dat"
   var baskets: Int = 0
   var support: Double = 0
 
@@ -35,15 +36,13 @@ object Apriori {
   }
 
   def generateItemsets(initial: Set[Set[String]], singletons: Set[Set[String]]): Set[Set[String]] = {
-    println("Starting recursive stuff!")
     def generateCandidates(candidates: Set[Set[String]], singletons: Set[Set[String]], acc: Set[Set[String]]): Set[Set[String]] = {
       candidates.size match {
         case 0 => acc // Base case. No pairs had enough support to be generated.
         case _ =>
           // Scan/filter -> results in a Map[Set[String], count] with elements with support >= supportThreshold
-          println("Before scanData")
           val (supportedSets, unSupportedSets) = scanData(readData(dataPath), candidates)
-          println("After scanData")
+
           /* Generate candidates
               Combine supported candidate sets with singletons
               If a singleton already exists in the candidate set -> discard
@@ -56,7 +55,7 @@ object Apriori {
             singleton <- singletons if !singleton.subsetOf(candidate)
             test = candidate | singleton if unSupportedSets.forall(unSupported => !unSupported.subsetOf(test))
           } yield test
-          println("Supported set found!")
+          println(s"Supported set found! Number of sets: ${supportedSets.size} of size ${candidates.head.size}")
           generateCandidates(ourResult.toSet, singletons, acc ++ supportedSets)
       }
     }
@@ -66,7 +65,6 @@ object Apriori {
   // Task 2: Generating association rules with confidence at least c from the itemsets in a sales transaction database (a set of baskets)
   def findAssociation(itemset: Set[Set[String]], confidence: Double): Set[(Set[String], Set[String])] = {
     // For every subset A of itemset I, generate rule A -> I/A (items in itemset I without items in itemset A)
-    println("Starting to find associations!")
     val rules = itemset.flatMap(set => set.subsets()
       .filterNot(subset => subset.isEmpty || subset == set) // We are not interest in the empty sets nor the subset == entire set
       .map(subset => (subset, set.diff(subset)))) // (left side of rule, right side of rule)
@@ -91,27 +89,14 @@ object Apriori {
   def scanData(iter: Iterator[String], candidates: Set[Set[String]]): (Set[Set[String]], Set[Set[String]]) = {
     
     val result = Map[Set[String], Int]()
-    var y = 0
     while (iter.hasNext) {
-      val data = iter.next()
+      val data = iter.next().split(" ").toSet
       candidates.foreach{x =>
-        if(x.subsetOf(data.split(" ").toSet)){
+        if(x.subsetOf(data)){
           result.put(x, result.getOrElse(x, 0) + 1)
         }
-
       }
-      if(y.equals(10000)){
-        println("10000 reached 10%")
-      }
-      y+=1
     }
-    /*while (iter.hasNext) {
-      val data = iter.next()
-      candidates
-        .withFilter(candidate => candidate.subsetOf(data.split(" ").toSet))
-        .foreach(elem => result.put(elem, result.getOrElse(elem, 0) + 1))
-    }
-    */
     val (supportedSets, unSupportedSets) = result.partition { case (k, v) => (v.toDouble / baskets) >= support }
     (supportedSets.keys.toSet, unSupportedSets.keys.toSet)
   }
@@ -120,10 +105,12 @@ object Apriori {
   def scanDataOnlyCount(iter: Iterator[String], candidates: Set[Set[String]]): Map[Set[String], Int] = {
     val result = Map[Set[String], Int]()
     while (iter.hasNext) {
-      val data = iter.next()
-      candidates
-        .filter(candidate => candidate.subsetOf(data.split(" ").toSet))
-        .foreach(elem => result.put(elem, result.getOrElse(elem, 0) + 1))
+      val data = iter.next().split(" ").toSet
+      candidates.foreach{x =>
+        if(x.subsetOf(data)){
+          result.put(x, result.getOrElse(x, 0) + 1)
+        }
+      }
     }
     result
   }
