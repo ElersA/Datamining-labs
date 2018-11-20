@@ -3,29 +3,33 @@ import org.apache.spark.SparkContext._
 import org.apache.spark.streaming.Seconds
 import org.apache.spark.streaming.StreamingContext
 import org.apache.spark.streaming.StreamingContext._
+
+import scala.collection.mutable
 import scala.io.Source
 
 object PaperImplementation extends App{
 
-  // Set up the Spark configuration with the app name and use two threads
-  val sparkConf = new SparkConf().setAppName("id2221proj").setMaster("local[2]")
-
-  // Use the config to create a streaming context with a batch interval of every 5 seconds.
-  val ssc = new StreamingContext(sparkConf, Seconds(5))
-
-  val M_threshold = 6
+  var M_threshold = 0;
   val random = scala.util.Random
   random.setSeed(0L)
-  var S: scala.collection.mutable.Set[(Int, Int)] = Set[(Int, Int)]()
+  var sample: mutable.Map[Int, (Int, Set[Int])] = mutable.Map[Int, (Int, Set[Int])]()
+  var T = 0 // Counter for number of global triangles
+  // read data
 
+  something.foreach{something =>
+    // increment counter
+    if sample.reservoirSampling(something, counter) {
+      sample.addadd edge to sample
+      sample.updateCounters
+    }
+  }
 
-
-  def reservoirSampling(nodeAndEdge: (Int, Int), t: Int): Boolean = {
+  def reservoirSampling(nodes: (Int, Int), t: Int): Boolean = {
     if (t <= M_threshold) {
       true
     } else if (random.nextDouble() <= M_threshold.toDouble / t) {
-      val toRemove = S.toVector(random.nextInt(M_threshold))
-      S.remove(toRemove)
+      val toRemove = sample.toVector(random.nextInt(M_threshold))
+      sample.remove(toRemove)
       updateCounters(-1, (1,2))
       true
     }
@@ -33,8 +37,13 @@ object PaperImplementation extends App{
   }
 
   // Mode can be either 1 for addition or -1 for subtraction
-  def updateCounters(mode: Int, nodeAndEdge: (Int, Int)): Unit = {
-
+  def updateCounters(mode: Int, nodes: (Int, Int)): Unit = {
+    val commonNeighbourhood = sample(nodes._1)._2.intersect(sample(nodes._2)._2)
+    commonNeighbourhood.foreach{commonNode =>
+      T = T + mode
+      sample(commonNode) = (sample(commonNode)._1 + mode, sample(commonNode)._2) // TODO check if we need options
+      sample(nodes._1) = (sample(nodes._1)._1 + mode, sample(nodes._1)._2)
+      sample(nodes._2) = (sample(nodes._2)._1 + mode, sample(nodes._2)._2)
+    }
   }
-
 }
