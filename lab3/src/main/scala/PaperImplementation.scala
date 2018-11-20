@@ -1,26 +1,27 @@
-import org.apache.spark.SparkConf
-import org.apache.spark.SparkContext._
-import org.apache.spark.streaming.Seconds
-import org.apache.spark.streaming.StreamingContext
-import org.apache.spark.streaming.StreamingContext._
 
 import scala.collection.mutable
 import scala.io.Source
 
 object PaperImplementation extends App{
 
-  var M_threshold = 0;
+  var M_threshold = 0
   val random = scala.util.Random
   random.setSeed(0L)
   var sample: mutable.Map[Int, (Int, Set[Int])] = mutable.Map[Int, (Int, Set[Int])]()
   var T = 0 // Counter for number of global triangles
-  // read data
+  var iteration = 0
+  val dataStream: Iterator[String] = readData("./src/main/scala/data/REPLACE THIS") // TODO replace with a file
 
-  something.foreach{something =>
-    // increment counter
-    if sample.reservoirSampling(something, counter) {
-      sample.addadd edge to sample
-      sample.updateCounters
+  dataStream
+    .map{twoNodes =>
+      val nodes = twoNodes.split(" ")
+      (nodes(0).toInt, nodes(1).toInt)
+    }
+    .foreach{nodes =>
+    iteration += 1
+    if (reservoirSampling(nodes, iteration)) {
+      sample.put(nodes._1, (0, Set(nodes._2)))
+      updateCounters(1, nodes)
     }
   }
 
@@ -28,8 +29,10 @@ object PaperImplementation extends App{
     if (t <= M_threshold) {
       true
     } else if (random.nextDouble() <= M_threshold.toDouble / t) {
-      val toRemove = sample.toVector(random.nextInt(M_threshold))
-      sample.remove(toRemove)
+      val keys = sample.keySet.toList
+      val randomKey = random.nextInt(keys.size)
+      val keyToRemove = keys(randomKey)
+      sample.remove(keyToRemove)
       updateCounters(-1, (1,2))
       true
     }
@@ -46,4 +49,6 @@ object PaperImplementation extends App{
       sample(nodes._2) = (sample(nodes._2)._1 + mode, sample(nodes._2)._2)
     }
   }
+
+  def readData(path: String): Iterator[String] = Source.fromFile(path).getLines
 }
