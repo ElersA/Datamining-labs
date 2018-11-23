@@ -8,29 +8,28 @@ object TriestImproved {
   var counters: mutable.Map[Int, Double] = mutable.Map[Int, Double]()
   var sample: mutable.Set[(Int, Int)] = mutable.Set[(Int, Int)]()
   var T: Double = 0 // Counter for number of global triangles
-  var t = 0 // Edge counter
-  var M_threshold = 0
+  var t: Double = 0 // Edge counter
+  var M_threshold: Double = 0
+  var previousT: Double = 0
 
   def start(dataStream: Iterator[(Int, Int)], M_threshold: Int, window_Size :Int): Unit = {
     this.M_threshold = M_threshold
 
     dataStream
       .foreach { nodes =>
-        if (window_Size > t) {
-          t += 1
-          updateCounters(nodes)
-          if (reservoirSampling(nodes)) {
-            sample.+=((nodes._1, nodes._2))
-          }
+
+        t += 1
+        updateCounters(nodes)
+        if (reservoirSampling(nodes)) {
+          sample.+=((nodes._1, nodes._2))
         }
-        if (window_Size == t) {
+
+        if (t % window_Size == 0) {
           //if window size reached print results and reset counters and the sample
           println("--Window results--")
-          printResults()
-          t = 0
-          T = 0
-          counters = mutable.Map[Int, Double]()
-          sample = mutable.Set[(Int, Int)]()
+          val windowResult = T - previousT
+          previousT = T
+          println(s"Window global triangles: ${math.round(windowResult)}")
         }
       }
     printResults()
@@ -39,7 +38,7 @@ object TriestImproved {
   def reservoirSampling(nodes: (Int, Int)): Boolean = {
     if (t <= M_threshold) {
       true
-    } else if (random.nextDouble() <= M_threshold.toDouble / t) {
+    } else if (random.nextDouble() <= M_threshold / t) {
       val sampleAsVector = sample.toVector
       val elementToRemove = sampleAsVector(random.nextInt(sampleAsVector.length)) // Get a random element
       sample.remove(elementToRemove)
@@ -64,7 +63,7 @@ object TriestImproved {
     val commonNeighbourhood = nodeOnesNeighbors.intersect(nodeTwosNeighbors)
 
     commonNeighbourhood.foreach { commonNode =>
-      val increment = math.max(1, ((t - 1) * (t - 2)).toDouble / (M_threshold * (M_threshold - 1)))
+      val increment = math.max(1, ((t - 1) * (t - 2)) / (M_threshold * (M_threshold - 1)))
       T = T + increment
 
       val commonNodeCounter: Double = counters.getOrElse(commonNode, 0)

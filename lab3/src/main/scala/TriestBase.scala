@@ -7,41 +7,40 @@ object TriestBase {
   random.setSeed(0L)
   var counters: mutable.Map[Int, Int] = mutable.Map[Int, Int]()
   var sample: mutable.Set[(Int, Int)] = mutable.Set[(Int, Int)]()
-  var T :Double = 0 // Counter for number of global triangles
-  var t = 0 // Edge counter
-  var M_threshold = 0
+  var T: Double = 0 // Counter for number of global triangles
+  var t: Double = 0 // Edge counter
+  var M_threshold: Double = 0
+  var previousT: Double = 0
 
   def start(dataStream: Iterator[(Int, Int)], M_threshold: Int,  window_Size :Int): Unit = {
     this.M_threshold = M_threshold
     
     dataStream
       .foreach { nodes =>
-        if (window_Size > t) {
-          t += 1
-          if (reservoirSampling(nodes, t)) {
-            sample.+=((nodes._1, nodes._2))
-            updateCounters(1, nodes)
-          }
+
+        t += 1
+        if (reservoirSampling(nodes, t)) {
+          sample.+=((nodes._1, nodes._2))
+          updateCounters(1, nodes)
         }
-        if (window_Size == t) {
+
+        if (t % window_Size == 0) {
           //if window size reached print results and reset counters and the sample
           println("--Window results--")
-          T = T * math.max(1, ((t - 1) * (t - 2)).toDouble / (M_threshold * (M_threshold - 1)))
-
-          printResults()
-          t = 0
-          T = 0
-          counters = mutable.Map[Int, Int]()
-          sample = mutable.Set[(Int, Int)]()
+          val estimate = (T - previousT) * math.max(1, ((t - 1) * (t - 2)) / (M_threshold * (M_threshold - 1)))
+          val windowResult = if (estimate < 0) 0 else estimate
+          previousT = T
+          println(s"Window global triangles: ${math.round(windowResult)}")
         }
     }
+    T = T * math.max(1, ((t - 1) * (t - 2)) / (M_threshold * (M_threshold - 1)))
     printResults()
   }
 
-  def reservoirSampling(nodes: (Int, Int), t: Int): Boolean = {
+  def reservoirSampling(nodes: (Int, Int), t: Double): Boolean = {
     if (t <= M_threshold) {
       true
-    } else if (random.nextDouble() <= M_threshold.toDouble / t) {
+    } else if (random.nextDouble() <= M_threshold / t) {
       val sampleAsVector = sample.toVector
       val elementToRemove = sampleAsVector(random.nextInt(sampleAsVector.length)) // Get a random element
       sample.remove(elementToRemove)

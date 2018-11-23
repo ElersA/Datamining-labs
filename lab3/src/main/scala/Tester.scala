@@ -3,8 +3,8 @@ import scala.io.Source
 object Tester extends App {
 
   val isTest = true
-  val M_threshold = 88234
-  val window_size = readData(isTest).length
+  val M_threshold = 16
+  val window_size = 9
 
   println(s"Parameters:\nisTest = $isTest\nM = $M_threshold\nWindow size: $window_size\n")
   println("<TriestBase results>")
@@ -44,6 +44,7 @@ object Tester extends App {
         }
       */
 
+      /*
       // https://snap.stanford.edu/data/ego-Facebook.html
       // Number of global triangles: 1612010
       // Number of edges: 88234
@@ -54,8 +55,9 @@ object Tester extends App {
           val nodes = twoNodes.split(" ")
           (nodes(0).toInt, nodes(1).toInt)
         }
+      */
 
-      /*
+
       // Number of global triangles: 9
       // Number of edges: 27
       Source
@@ -65,7 +67,7 @@ object Tester extends App {
           val nodes = twoNodes.split(" ")
           (nodes(0).toInt, nodes(1).toInt)
         }
-      */
+
     } else {
       Source
         .fromFile("./src/main/scala/data/actor-collaboration/out.actor-collaboration")
