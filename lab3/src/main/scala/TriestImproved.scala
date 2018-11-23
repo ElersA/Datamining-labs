@@ -11,19 +11,29 @@ object TriestImproved {
   var t = 0 // Edge counter
   var M_threshold = 0
 
-  def start(dataStream: Iterator[(Int, Int)], M_threshold: Int): Unit = {
+  def start(dataStream: Iterator[(Int, Int)], M_threshold: Int, window_Size :Int): Unit = {
     this.M_threshold = M_threshold
 
     dataStream
       .foreach { nodes =>
-        t += 1
-        updateCounters(nodes)
-        if (reservoirSampling(nodes)) {
-          sample.+=((nodes._1, nodes._2))
+        if (window_Size > t) {
+          t += 1
+          updateCounters(nodes)
+          if (reservoirSampling(nodes)) {
+            sample.+=((nodes._1, nodes._2))
+          }
+        }
+        else {
+          //if window size reached print results and reset counters and the sample
+          printResults()
+          t = 0
+          T = 0
+          counters: mutable.Map[Int, Int] = mutable.Map[Int, Int]()
+          sample: mutable.Set[(Int, Int)] = mutable.Set[(Int, Int)]()
         }
       }
     //println(s"Number of counters: ${counters.size}")
-    printResults()
+
   }
 
   def reservoirSampling(nodes: (Int, Int)): Boolean = {

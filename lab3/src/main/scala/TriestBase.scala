@@ -7,23 +7,35 @@ object TriestBase {
   random.setSeed(0L)
   var counters: mutable.Map[Int, Int] = mutable.Map[Int, Int]()
   var sample: mutable.Set[(Int, Int)] = mutable.Set[(Int, Int)]()
-  var T = 0 // Counter for number of global triangles
+  var T :Double = 0 // Counter for number of global triangles
   var t = 0 // Edge counter
   var M_threshold = 0
 
-  def start(dataStream: Iterator[(Int, Int)], M_threshold: Int): Unit = {
+  def start(dataStream: Iterator[(Int, Int)], M_threshold: Int,  window_Size :Int): Unit = {
     this.M_threshold = M_threshold
     
     dataStream
       .foreach { nodes =>
-        t += 1
-        if (reservoirSampling(nodes, t)) {
-          sample.+=((nodes._1, nodes._2))
-          updateCounters(1, nodes)
+        if (window_Size > t) {
+          t += 1
+          if (reservoirSampling(nodes, t)) {
+            sample.+=((nodes._1, nodes._2))
+            updateCounters(1, nodes)
+          }
         }
-      }
+
+    else {
+      //if window size reached print results and reset counters and the sample
+      T = T * math.max(1, ((t - 1) * (t - 2)).toDouble / (M_threshold * (M_threshold - 1)))
+
+      printResults()
+      t = 0
+      T = 0
+      counters: mutable.Map[Int, Int] = mutable.Map[Int, Int]()
+      sample: mutable.Set[(Int, Int)] = mutable.Set[(Int, Int)]()
+    }
     //println(s"Number of counters: ${counters.size}")
-    printResults()
+  }
   }
 
   def reservoirSampling(nodes: (Int, Int), t: Int): Boolean = {
