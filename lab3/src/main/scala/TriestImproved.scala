@@ -5,7 +5,7 @@ object TriestImproved {
 
   val random = scala.util.Random
   random.setSeed(0L)
-  var counters: mutable.Map[Int, Int] = mutable.Map[Int, Int]()
+  var counters: mutable.Map[Int, Double] = mutable.Map[Int, Double]()
   var sample: mutable.Set[(Int, Int)] = mutable.Set[(Int, Int)]()
   var T: Double = 0 // Counter for number of global triangles
   var t = 0 // Edge counter
@@ -23,17 +23,17 @@ object TriestImproved {
             sample.+=((nodes._1, nodes._2))
           }
         }
-        else {
+        if (window_Size == t) {
           //if window size reached print results and reset counters and the sample
+          println("--Window results--")
           printResults()
           t = 0
           T = 0
-          counters: mutable.Map[Int, Int] = mutable.Map[Int, Int]()
-          sample: mutable.Set[(Int, Int)] = mutable.Set[(Int, Int)]()
+          counters = mutable.Map[Int, Double]()
+          sample = mutable.Set[(Int, Int)]()
         }
       }
-    //println(s"Number of counters: ${counters.size}")
-
+    printResults()
   }
 
   def reservoirSampling(nodes: (Int, Int)): Boolean = {
@@ -64,28 +64,16 @@ object TriestImproved {
     val commonNeighbourhood = nodeOnesNeighbors.intersect(nodeTwosNeighbors)
 
     commonNeighbourhood.foreach { commonNode =>
-      //println("Found triangle")
       val increment = math.max(1, ((t - 1) * (t - 2)).toDouble / (M_threshold * (M_threshold - 1)))
       T = T + increment
 
-      /*
-      val commonNodeCounter = counters.getOrElse(commonNode, 0)
-      val nodeOneCounter = counters.getOrElse(nodes._1, 0)
-      val nodeTwoCounter = counters.getOrElse(nodes._2, 0)
+      val commonNodeCounter: Double = counters.getOrElse(commonNode, 0)
+      val nodeOneCounter: Double = counters.getOrElse(nodes._1, 0)
+      val nodeTwoCounter: Double = counters.getOrElse(nodes._2, 0)
 
       counters.update(commonNode, commonNodeCounter + increment)
       counters.update(nodes._1, nodeOneCounter + increment)
       counters.update(nodes._2, nodeTwoCounter + increment)
-      */
-      /*
-      if (commonNodeCounter == 1 && mode == -1) {
-        counters.remove(commonNode)
-      } else if (nodeOneCounter == 1 && mode == -1) {
-        counters.remove(nodes._1)
-      } else if (nodeOneCounter == 1 && mode == -1) {
-        counters.remove(nodes._2)
-      }
-      */
     }
   }
 

@@ -23,19 +23,19 @@ object TriestBase {
             updateCounters(1, nodes)
           }
         }
+        if (window_Size == t) {
+          //if window size reached print results and reset counters and the sample
+          println("--Window results--")
+          T = T * math.max(1, ((t - 1) * (t - 2)).toDouble / (M_threshold * (M_threshold - 1)))
 
-    else {
-      //if window size reached print results and reset counters and the sample
-      T = T * math.max(1, ((t - 1) * (t - 2)).toDouble / (M_threshold * (M_threshold - 1)))
-
-      printResults()
-      t = 0
-      T = 0
-      counters: mutable.Map[Int, Int] = mutable.Map[Int, Int]()
-      sample: mutable.Set[(Int, Int)] = mutable.Set[(Int, Int)]()
+          printResults()
+          t = 0
+          T = 0
+          counters = mutable.Map[Int, Int]()
+          sample = mutable.Set[(Int, Int)]()
+        }
     }
-    //println(s"Number of counters: ${counters.size}")
-  }
+    printResults()
   }
 
   def reservoirSampling(nodes: (Int, Int), t: Int): Boolean = {
@@ -90,7 +90,7 @@ object TriestBase {
 
   def printResults(): Unit = {
     println(s"Number of edges: $t")
-    println(s"Global triangles: $T")
+    println(s"Global triangles: ${math.round(T)}")
     /*
     counters.foreach{case (key, counter) =>
       println(s"$key has $counter triangles")

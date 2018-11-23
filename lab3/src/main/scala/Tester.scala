@@ -3,17 +3,18 @@ import scala.io.Source
 object Tester extends App {
 
   val isTest = true
-  val M_threshold = 6000
+  val M_threshold = 88234
+  val window_size = readData(isTest).length
 
-  println(s"Parameters:\nisTest = $isTest\nM = $M_threshold\n")
+  println(s"Parameters:\nisTest = $isTest\nM = $M_threshold\nWindow size: $window_size\n")
   println("<TriestBase results>")
   time("Execution time: "){
-    TriestBase.start(readData(isTest), M_threshold)
+    TriestBase.start(readData(isTest), M_threshold, window_size)
   }
 
   println("\n<TriestImproved results>")
   time("Execution time: "){
-    TriestImproved.start(readData(isTest), M_threshold)
+    TriestImproved.start(readData(isTest), M_threshold, window_size)
   }
 
   // From http://biercoff.com/easily-measuring-code-execution-time-in-scala/ (slightly modified)
@@ -27,7 +28,12 @@ object Tester extends App {
 
   def readData(isTest: Boolean): Iterator[(Int, Int)] = {
     if (isTest) {
+
       /*
+      // Directed dataset. Don't use it. It works though.
+      // https://snap.stanford.edu/data/p2p-Gnutella06.html
+      // Number of global triangles: 1142
+      // Number of edges: 31525
       Source
         .fromFile("./src/main/scala/data/p2p-Gnutella06.txt")
         .getLines
@@ -38,6 +44,20 @@ object Tester extends App {
         }
       */
 
+      // https://snap.stanford.edu/data/ego-Facebook.html
+      // Number of global triangles: 1612010
+      // Number of edges: 88234
+      Source
+        .fromFile("./src/main/scala/data/facebook_combined.txt")
+        .getLines
+        .map{twoNodes =>
+          val nodes = twoNodes.split(" ")
+          (nodes(0).toInt, nodes(1).toInt)
+        }
+
+      /*
+      // Number of global triangles: 9
+      // Number of edges: 27
       Source
         .fromFile("./src/main/scala/data/validationGraph")
         .getLines
@@ -45,7 +65,7 @@ object Tester extends App {
           val nodes = twoNodes.split(" ")
           (nodes(0).toInt, nodes(1).toInt)
         }
-
+      */
     } else {
       Source
         .fromFile("./src/main/scala/data/actor-collaboration/out.actor-collaboration")
