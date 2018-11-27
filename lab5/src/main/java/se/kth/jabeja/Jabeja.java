@@ -19,6 +19,7 @@ public class Jabeja {
   private int round;
   private float T;
   private boolean resultFileCreated = false;
+  private Random r = new Random(1);
 
   //-------------------------------------------------------------------
   public Jabeja(HashMap<Integer, Node> graph, Config config) {
@@ -33,6 +34,8 @@ public class Jabeja {
 
   //-------------------------------------------------------------------
   public void startJabeja() throws IOException {
+    //set T to 1 for the simulated anneling
+    T = 1;
     for (round = 0; round < config.getRounds(); round++) {
       for (int id : entireGraph.keySet()) {
         sampleAndSwap(id);
@@ -49,11 +52,16 @@ public class Jabeja {
    * Simulated analealing cooling function
    */
   private void saCoolDown(){
+      double T_min = 0.00001;
+      if( T > T_min){
+          T = T * config.getDelta();
+      }
     // TODO for second task
-    if (T > 1)
+    /*if (T > 1)
       T -= config.getDelta();
     if (T < 1)
       T = 1;
+    */
   }
 
   /**
@@ -85,7 +93,12 @@ public class Jabeja {
     // swap the colors
     // TODO
       if(partner != null){
+        int pColor = nodep.getColor();
+        nodep.setColor(partner.getColor());
+        partner.setColor(pColor);
+        numberOfSwaps++;
         //color exchange between nodep and partner
+
       }
   }
 
@@ -106,10 +119,18 @@ public class Jabeja {
         //get opposite color here
         int dpq = getDegree(nodep,nodeQ.getColor());
         int dqp = getDegree(nodeQ,nodep.getColor());
+
         double varNew = Math.pow(dpq,config.getAlpha().doubleValue()) + Math.pow(dqp,config.getAlpha().doubleValue());
+    /*
         if((varNew * T > old) && (varNew > highestBenefit)){
             bestPartner = nodeQ;
             highestBenefit = varNew;
+        }*/
+
+        double acceptance_probability = Math.exp((old-varNew)/T);
+        if(acceptance_probability > r.nextDouble()){
+            bestPartner = nodeQ;
+            old = varNew;
         }
     }
     return bestPartner;
