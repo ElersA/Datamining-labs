@@ -25,7 +25,7 @@ object TriestBase {
         }
 
         if (t % window_Size == 0) {
-          //if window size reached print results and reset counters and the sample
+          //if window size reached print results
           println("--Window results--")
           val estimate = (T - previousT) * math.max(1, ((t - 1) * (t - 2)) / (M_threshold * (M_threshold - 1)))
           val windowResult = if (estimate < 0) 0 else estimate
@@ -79,9 +79,11 @@ object TriestBase {
 
       if (commonNodeCounter == 1 && mode == -1) {
         counters.remove(commonNode)
-      } else if (nodeOneCounter == 1 && mode == -1) {
+      }
+      if (nodeOneCounter == 1 && mode == -1) {
         counters.remove(nodes._1)
-      } else if (nodeOneCounter == 1 && mode == -1) {
+      }
+      if (nodeTwoCounter == 1 && mode == -1) {
         counters.remove(nodes._2)
       }
     }
