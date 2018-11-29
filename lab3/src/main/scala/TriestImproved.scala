@@ -25,7 +25,7 @@ object TriestImproved {
         }
 
         if (t % window_Size == 0) {
-          //if window size reached print results and reset counters and the sample
+          //if window size reached print results
           println("--Window results--")
           val windowResult = T - previousT
           previousT = T
